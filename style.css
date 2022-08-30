@@ -1,0 +1,124 @@
+body {
+  background-image: url("./library.jpg");
+  background-size: cover;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+  border-left: none;
+  border-right: none;
+  border-collapse: collapse;
+  
+}
+th{
+  color: brown;
+}
+td{
+  background-color: rgb(68, 48, 12);
+  color: yellow;
+}
+table {
+  margin-top: 10px;
+  position: relative;
+}
+
+#bibliotekeWrapper{
+  max-width: 650px;
+  display: inline-block;
+  margin-right: 50px;
+  vertical-align: top;
+}
+#novaBibiloteka{
+  display: inline-block;
+  margin-left: 50px;
+}
+#knjigeWrapper{
+  max-width: 500px;
+  display: inline-block;
+  vertical-align: top;
+}
+.header {
+  
+  background-size: cover;
+  height: 100vh;
+}
+
+.opis {
+  background-color: white;
+  width: 60%;
+  margin-left: 20%;
+  font-size: 14pt;
+  line-height: 25pt;
+  word-spacing: 3pt;
+  padding: 40px;
+  text-align: justify;
+  border-radius: 20px;
+}
+
+.formaZaDodavanje,
+.formaZaKontakt {
+  background-color: white;
+  width: 60%;
+  margin-left: 20%;
+  font-size: 14pt;
+  line-height: 25pt;
+  padding: 40px;
+  text-align: center;
+  border-radius: 20px;
+}
+
+.page-footer {
+  background-color: #8b5b62;
+  color: white;
+}
+
+#ikona {
+  width: 30px;
+}
+
+.garderoba {
+  background-color: white;
+  width: 70%;
+  margin-left: 15%;
+  font-size: 14pt;
+  line-height: 25pt;
+  word-spacing: 3pt;
+  padding: 40px;
+  text-align: justify;
+  border-radius: 20px;
+}
+
+#kategorija {
+  font-family: sans-serif;
+  font-size: 12pt;
+  color: #ac1a14;
+  width: 180px;
+  border: #ac1a14 solid;
+  border-radius: 12px;
+  margin-left: 30px;
+  padding: 5px;
+}
+
+#cena {
+  font-family: sans-serif;
+  font-size: 12pt;
+  color: #ac1a14;
+  width: 180px;
+  border: #ac1a14 solid;
+  border-radius: 12px;
+  margin-left: 30px;
+  padding: 5px;
+  border: #ac1a14 solid;
+  float: right;
+  margin-right: 30px;
+}
+
+.odecaDiv {
+  text-align: center;
+}
+
+.redOdece{
+  margin-top: 10%;
+}

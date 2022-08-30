@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <title>Biblioteke</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">biblioteke</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">Početna</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="biblioteke.html">Biblioteke</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="knjige.html">Knjige</a>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+    <div id="bibliotekeWrapper">
+        <label id="izabranaBiblioteka" hidden=true></label>
+        <table class="table">
+            <tr>
+                <th scope="col">Rb</th>
+                <th scope="col">Naziv</th>
+                <th scope="col">Adresa</th>
+            </tr>
+            <tbody id="biblioteke">
+
+            </tbody>
+
+        </table>
+    </div>
+    <div id="knjigeWrapper" hidden="true">
+
+        <table id="knjige" class="table" hidden="true">
+            <tr>
+                <th scope="col">Rb</th>
+                <th scope="col">Naziv</th>
+                <th scope="col">Broj primeraka</th>
+            </tr>
+            <tbody id="knjigeBody"></tbody>
+        </table>
+        <div id="dodavanjeNoveVeze" hidden=true>
+            <select id="komboSaKnjigama" class="form-control"></select>
+            <input class="form-control" type="text" id="brojPrimeraka" placeholder="Broj primeraka" />
+            <button id="dodajVezu">Dodaj knjigu u biblioteku</button>
+        </div>
+    </div>
+    <div id="novaBibiloteka">
+        <h1>Dodaj biblioteku</h1>
+        <form class="mt-5">
+            <div class="form-group">
+                <input type="text" class="form-control" id="nazivBiblioteke" placeholder="Naziv">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="adresaBiblioteke" placeholder="Adresa">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" id="dodajBibiloteku">Dodaj bibiloteku</button>
+            </div>
+        </form>
+
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            napuniBiblioteke();
+            $("#dodajBibiloteku").click(function (e) {
+                e.preventDefault();
+                $.post("biblioteke.php", {
+                    metoda: "dodaj",
+                    naziv: $("#nazivBiblioteke").val(),
+                    adresa: $("#adresaBiblioteke").val()
+                }, function (data) {
+                    if (data !== "ok") {
+                        alert(data);
+                    }
+                    napuniBiblioteke();
+                })
+            })
+            $("#dodajVezu").click(dodajVezuKlik);
+        });
+
+        function napuniBiblioteke() {
+            $.getJSON("biblioteke.php", { metoda: "vratiSve" }, function (data) {
+                console.log(data);
+                if (data.status !== "ok") {
+                    alert(data.status);
+                    return;
+                }
+                $("#biblioteke").html("");
+                let i = 0;
+                for (let biblioteka of data.data) {
+                    $("#biblioteke").append(`<tr>
+                        <th>${++i}</th>
+                        <td contentEditable=true id="${biblioteka.id}Naziv">${biblioteka.naziv}</td>
+                        <td contentEditable=true id="${biblioteka.id}Adresa" >${biblioteka.adresa}</td>
+                        <td>
+                            <button onClick="prikaziKnjige(${biblioteka.id})">Vidi sve knjige</button>
+                            <button onClick="izmeniBiblioteku(${biblioteka.id})">Izmeni</button>
+                            <button onClick="obrisiBiblioteku(${biblioteka.id})">Obrisi</button>
+                        </td>
+                    </tr>`)
+                }
+            })
+        }
+        function izmeniBiblioteku(id) {
+            let naziv = $(`#${id}Naziv`).text();
+            let adresa = $(`#${id}Adresa`).text();
+            $.post("biblioteke.php", {
+                metoda: "izmeni",
+                id: id,
+                naziv: naziv,
+                adresa: adresa
+            }, function (data) {
+                if (data !== "ok") {
+                    alert(data);
+                }
+                napuniBiblioteke();
+            })
+        }
+        function obrisiBiblioteku(id) {
+            $.post("biblioteke.php", { metoda: "obrisi", id: id }, function (data) {
+                if (data !== "ok") {
+                    alert(data);
+                }
+                napuniBiblioteke();
+            })
+        }
+        function prikaziKnjige(id) {
+            $.getJSON("knjige.php", { metoda: "vrati iz biblioteke", biblioteka: id }, function (data) {
+
+                if (data.status !== "ok") {
+                    alert(data.status);
+                    return;
+                }
+
+                let i = 0;
+                $("#knjige").attr("hidden", false);
+                $("#knjigeWrapper").attr("hidden", false);
+                $("#knjigeBody").html("");
+                for (let knjiga of data.data) {
+                    $("#knjigeBody").append(`
+                        <tr>
+                            <td>${++i}.</td>
+                            <td>${knjiga.naziv}</td>
+                            <td>${knjiga.brojPrimeraka}</td>
+                            <td>
+                                <button onClick="obrisiVezu(${id},${knjiga.id})"> Obrisi</button>
+                            </td>
+                        </tr>
+                    `);
+                }
+                $("#izabranaBiblioteka").val(id);
+                napuniKomboSaKnjigama(id);
+
+            })
+        }
+        function napuniKomboSaKnjigama(biblioteka) {
+            $.getJSON("knjige.php", { metoda: "vrati sve" }, function (data) {
+                console.log(data);
+                if (data.status !== "ok") {
+                    alert(data.status);
+                    return;
+                }
+                $("#dodavanjeNoveVeze").attr("hidden", false);
+                $("#komboSaKnjigama").html("");
+                for (let knjiga of data.data) {
+                    $("#komboSaKnjigama").append(`<option value ="${knjiga.id}" >${knjiga.naziv}</option>`);
+                }
+            })
+        }
+        function dodajVezuKlik(e) {
+            e.preventDefault();
+            $.post("biblioteke.php", {
+                metoda: "dodajVezu",
+                biblioteka: $("#izabranaBiblioteka").val(),
+                knjiga: $("#komboSaKnjigama").val(),
+                brojPrimeraka: $("#brojPrimeraka").val()
+            }, function (data) {
+                if (data !== "ok") {
+                    alert(data);
+                }
+                prikaziKnjige($("#izabranaBiblioteka").val());
+            })
+        }
+        function obrisiVezu(biblioteka, knjiga) {
+            $.post("biblioteke.php", {
+                metoda: "obrisiVezu",
+                biblioteka: biblioteka,
+                knjiga: knjiga
+            }, function (data) {
+                if (data !== "ok") {
+                    alert(data);
+                }
+                prikaziKnjige($("#izabranaBiblioteka").val());
+            })
+        }
+    </script>
+</body>
+
+</html>

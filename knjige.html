@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Sve knjige</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">biblioteke</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">Početna</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="biblioteke.html">Biblioteke</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="knjige.html">Knjige</a>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <table id="knjige" class="table display">
+            <tr>
+                <th scope="col">Rb</th>
+                <th scope="col">Naziv</th>
+                <th scope="col">Kategorija</th>
+                <th scope="col">Broj strana</th>
+            </tr>
+            <tbody id="knjige_podaci"></tbody>
+
+        </table>
+
+
+    </div>
+    <div class="formaZaDodavanje">
+        <h1>Dodaj knjigu</h1>
+        <form class="mt-5">
+            <div class="form-group">
+                <input type="text" class="form-control" id="naziv" placeholder="Naziv">
+            </div>
+            <div class="form-group">
+                <select class="form-control" id="novaKategorija">
+
+                </select>
+            </div>
+            <div class="form-group">
+                <input class="form-control" type="number" id="brojStrana" placeholder="Broj strana">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" id="dodajKnjigu">Dodaj Knjigu</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            napuniTabelu();
+            napuniKategorije("novaKategorija");
+            $("#dodajKnjigu").click(function (e) {
+                e.preventDefault();
+                $.post("knjige.php", {
+                    metoda: "dodaj",
+                    naziv: $("#naziv").val(),
+                    kategorija: $("#novaKategorija").val(),
+                    broj_strana: $("#brojStrana").val()
+                }, function (data) {
+                    alert(data);
+                    napuniTabelu();
+
+                })
+            })
+        });
+        function napuniTabelu() {
+            $.getJSON("knjige.php", { metoda: "vrati sve" }, function (data) {
+                console.log(data);
+                if (data.status !== "ok") {
+                    alert(data.status);
+                    return;
+                }
+                let i = 0;
+                $("#knjige_podaci").html("");
+                for (let knjiga of data.data) {
+                    $("#knjige_podaci").append(`<tr>
+                        <th scope="row">${++i}.</th>
+                    <td contentEditable=true id="${knjiga.id}Naziv" >${knjiga.naziv} </td>
+                    <td contentEditable=true ><select class="form-control" id="${knjiga.id}Kat" ></td>
+                    <td contentEditable=true id="${knjiga.id}strane" >${knjiga.broj_strana} </td>
+                    <td>
+                        <button onClick="izmeniKnjigu(${knjiga.id})">Izmeni</button>
+                        <button onClick="obrisiKnjigu(${knjiga.id})" >Obrisi</button>
+                    </td>
+                </tr>`);
+                    napuniKategorije(`${knjiga.id}Kat`, knjiga.kat_id);
+                }
+            });
+
+        }
+        function napuniKategorije(element, value = undefined) {
+            $.getJSON("knjige.php", { metoda: "vrati kategorije" }, function (data) {
+                if (data.status !== "ok") {
+                    alert(data.status);
+                    return;
+                }
+                $("#" + element).html(``);
+
+                for (let kat of data.data) {
+                    $("#" + element).append(`<option value='${kat.id}' > ${kat.naziv} </option>`);
+                }
+                if (value) {
+                    $("#" + element).val(value);
+                }
+            })
+        }
+        function obrisiKnjigu(id) {
+            $.post("knjige.php", { metoda: "obrisi", id: id }, function (data) {
+                napuniTabelu();
+            })
+        }
+        function izmeniKnjigu(id) {
+            let naziv = $(`#${id}Naziv`).text();
+            let kategorija = $(`#${id}Kat`).val();
+            let brojStrana = $(`#${id}strane`).text();
+
+            $.post("knjige.php", {
+                metoda: "izmeni",
+                id: id,
+                naziv: naziv,
+                kategorija: kategorija,
+                broj_strana: brojStrana
+            }, function (data) {
+                napuniTabelu();
+            })
+        }
+    </script>
+</body>
+
+</html>
